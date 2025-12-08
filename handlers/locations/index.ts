@@ -33,7 +33,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       };
 
       const result = await locations.insertOne(newLocation as Location);
-      const insertedLocation = await locations.findOne({ _id: result.insertedId });
+      const insertedLocation = await locations.findOne({ _id: result.insertedId } as any);
 
       await logAudit(
         user._id!,

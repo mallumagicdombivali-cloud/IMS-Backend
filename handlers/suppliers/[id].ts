@@ -21,7 +21,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const supplierId = new ObjectId(id);
 
     if (req.method === 'GET') {
-      const supplier = await suppliers.findOne({ _id: supplierId });
+      const supplier = await suppliers.findOne({ _id: supplierId } as any);
       if (!supplier) {
         return res.status(404).json({ success: false, error: 'Supplier not found' });
       }
@@ -30,7 +30,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (req.method === 'PATCH') {
-      const existingSupplier = await suppliers.findOne({ _id: supplierId });
+      const existingSupplier = await suppliers.findOne({ _id: supplierId } as any);
       if (!existingSupplier) {
         return res.status(404).json({ success: false, error: 'Supplier not found' });
       }
@@ -47,8 +47,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (validated.rating !== undefined) updateData.rating = validated.rating;
       if (req.body.isActive !== undefined) updateData.isActive = req.body.isActive;
 
-      await suppliers.updateOne({ _id: supplierId }, { $set: updateData });
-      const updatedSupplier = await suppliers.findOne({ _id: supplierId });
+      await suppliers.updateOne({ _id: supplierId } as any, { $set: updateData });
+      const updatedSupplier = await suppliers.findOne({ _id: supplierId } as any);
 
       await logAudit(
         user._id!,
@@ -63,13 +63,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (req.method === 'DELETE') {
-      const existingSupplier = await suppliers.findOne({ _id: supplierId });
+      const existingSupplier = await suppliers.findOne({ _id: supplierId } as any);
       if (!existingSupplier) {
         return res.status(404).json({ success: false, error: 'Supplier not found' });
       }
 
       await suppliers.updateOne(
-        { _id: supplierId },
+        { _id: supplierId } as any,
         { $set: { isActive: false, updatedAt: new Date() } }
       );
 

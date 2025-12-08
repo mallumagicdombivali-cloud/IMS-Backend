@@ -49,7 +49,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       };
 
       const result = await pos.insertOne(newPO as PurchaseOrder);
-      const insertedPO = await pos.findOne({ _id: result.insertedId });
+      const insertedPO = await pos.findOne({ _id: result.insertedId } as any);
 
       await logAudit(
         user._id!,

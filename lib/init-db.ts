@@ -161,7 +161,7 @@ export async function initializeDatabase(): Promise<void> {
         const collection = db.collection(collectionConfig.name);
         for (const index of collectionConfig.indexes) {
           try {
-            await collection.createIndex(index.key, index.options || {});
+            await collection.createIndex(index.key as any, (index as any).options || {});
           console.log(`    ✓ Index created: ${collectionConfig.name}.${Object.keys(index.key).join(',')}`);
           // Small delay to avoid overwhelming MongoDB
           await new Promise(resolve => setTimeout(resolve, 50));

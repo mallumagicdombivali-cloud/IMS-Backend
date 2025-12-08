@@ -26,7 +26,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const stockLedger = await getCollection<StockLedger>('stock_ledger');
     const returnId = new ObjectId(id);
 
-    const returnDoc = await returns.findOne({ _id: returnId });
+    const returnDoc = await returns.findOne({ _id: returnId } as any);
     if (!returnDoc) {
       return res.status(404).json({ success: false, error: 'Return not found' });
     }
@@ -43,7 +43,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(400).json({ success: false, error: `Invalid batch ID: ${item.batchId}` });
       }
 
-      const batch = await batches.findOne({ _id: new ObjectId(item.batchId) });
+      const batch = await batches.findOne({ _id: new ObjectId(item.batchId) } as any);
       if (!batch) {
         return res.status(404).json({ success: false, error: `Batch not found: ${item.batchId}` });
       }
@@ -83,7 +83,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Update return status
     await returns.updateOne(
-      { _id: returnId },
+      { _id: returnId } as any,
       {
         $set: {
           status: 'approved',
@@ -94,7 +94,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     );
 
-    const updatedReturn = await returns.findOne({ _id: returnId });
+    const updatedReturn = await returns.findOne({ _id: returnId } as any);
 
     await logAudit(
       user._id!,

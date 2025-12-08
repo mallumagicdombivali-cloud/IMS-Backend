@@ -23,7 +23,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const auditLogs = await getCollection<AuditLog>('audit_logs');
     const logId = new ObjectId(id);
 
-    const log = await auditLogs.findOne({ _id: logId });
+    const log = await auditLogs.findOne({ _id: logId } as any);
     if (!log) {
       return res.status(404).json({ success: false, error: 'Audit log not found' });
     }

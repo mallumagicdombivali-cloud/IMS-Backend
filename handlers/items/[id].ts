@@ -25,7 +25,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const itemId = new ObjectId(id);
 
     if (req.method === 'GET') {
-      const item = await items.findOne({ _id: itemId });
+      const item = await items.findOne({ _id: itemId } as any);
       if (!item) {
         return res.status(404).json({ success: false, error: 'Item not found' });
       }
@@ -34,7 +34,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (req.method === 'PATCH') {
-      const existingItem = await items.findOne({ _id: itemId });
+      const existingItem = await items.findOne({ _id: itemId } as any);
       if (!existingItem) {
         return res.status(404).json({ success: false, error: 'Item not found' });
       }
@@ -48,8 +48,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
       });
 
-      await items.updateOne({ _id: itemId }, { $set: updateData });
-      const updatedItem = await items.findOne({ _id: itemId });
+      await items.updateOne({ _id: itemId } as any, { $set: updateData });
+      const updatedItem = await items.findOne({ _id: itemId } as any);
 
       await logAudit(
         user._id!,
@@ -64,12 +64,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (req.method === 'DELETE') {
-      const existingItem = await items.findOne({ _id: itemId });
+      const existingItem = await items.findOne({ _id: itemId } as any);
       if (!existingItem) {
         return res.status(404).json({ success: false, error: 'Item not found' });
       }
 
-      await items.deleteOne({ _id: itemId });
+      await items.deleteOne({ _id: itemId } as any);
 
       await logAudit(
         user._id!,

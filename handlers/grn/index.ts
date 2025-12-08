@@ -28,7 +28,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       // Verify PO exists
       const poId = new ObjectId(validated.poId);
-      const po = await pos.findOne({ _id: poId });
+      const po = await pos.findOne({ _id: poId } as any);
       if (!po) {
         return res.status(404).json({ success: false, error: 'PO not found' });
       }
@@ -90,7 +90,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         poId: validated.poId,
         supplierId: po.supplierId,
         receivedBy: user._id!,
-        items: validated.items,
+        items: validated.items.map(item => ({
+          ...item,
+          expiryDate: item.expiryDate ? new Date(item.expiryDate) : undefined,
+        })),
         status: 'completed',
         totalAmount,
         receivedAt: now,
@@ -105,7 +108,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       // Update batches with GRN ID
       for (const batchId of createdBatches) {
         await batches.updateOne(
-          { _id: new ObjectId(batchId) },
+          { _id: new ObjectId(batchId) } as any,
           { $set: { grnId } }
         );
       }
@@ -119,7 +122,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       // Update PO status
       const allItemsReceived = validated.items.length >= po.items.length;
       await pos.updateOne(
-        { _id: poId },
+        { _id: poId } as any,
         {
           $set: {
             status: allItemsReceived ? 'completed' : 'partial',
@@ -128,7 +131,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
       );
 
-      const insertedGRN = await grns.findOne({ _id: grnResult.insertedId });
+      const insertedGRN = await grns.findOne({ _id: grnResult.insertedId } as any);
 
       await logAudit(
         user._id!,

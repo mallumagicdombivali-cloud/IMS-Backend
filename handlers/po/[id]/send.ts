@@ -24,7 +24,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const pos = await getCollection<PurchaseOrder>('purchase_orders');
     const poId = new ObjectId(id);
 
-    const po = await pos.findOne({ _id: poId });
+    const po = await pos.findOne({ _id: poId } as any);
     if (!po) {
       return res.status(404).json({ success: false, error: 'PO not found' });
     }
@@ -34,7 +34,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     await pos.updateOne(
-      { _id: poId },
+      { _id: poId } as any,
       {
         $set: {
           status: 'sent',
@@ -44,7 +44,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     );
 
-    const updatedPO = await pos.findOne({ _id: poId });
+    const updatedPO = await pos.findOne({ _id: poId } as any);
 
     await logAudit(
       user._id!,

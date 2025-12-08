@@ -31,7 +31,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       };
 
       const result = await suppliers.insertOne(newSupplier as Supplier);
-      const insertedSupplier = await suppliers.findOne({ _id: result.insertedId });
+      const insertedSupplier = await suppliers.findOne({ _id: result.insertedId } as any);
 
       await logAudit(
         user._id!,

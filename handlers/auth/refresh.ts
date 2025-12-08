@@ -19,7 +19,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const payload = verifyRefreshToken(refreshToken);
     const users = await getCollection<User>('users');
-    const user = await users.findOne({ _id: payload.userId });
+    const user = await users.findOne({ _id: payload.userId } as any);
 
     if (!user) {
       return res.status(401).json({ success: false, error: 'Invalid refresh token' });

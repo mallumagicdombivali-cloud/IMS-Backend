@@ -26,7 +26,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const returns = await getCollection<Return>('returns');
     const returnId = new ObjectId(id);
 
-    const returnDoc = await returns.findOne({ _id: returnId });
+    const returnDoc = await returns.findOne({ _id: returnId } as any);
     if (!returnDoc) {
       return res.status(404).json({ success: false, error: 'Return not found' });
     }

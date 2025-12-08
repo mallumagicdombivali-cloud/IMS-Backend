@@ -28,7 +28,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!ObjectId.isValid(validated.batchId)) {
         return res.status(400).json({ success: false, error: 'Invalid batch ID' });
       }
-      batch = await batches.findOne({ _id: new ObjectId(validated.batchId) });
+      batch = await batches.findOne({ _id: new ObjectId(validated.batchId) } as any);
       if (!batch) {
         return res.status(404).json({ success: false, error: 'Batch not found' });
       }
@@ -87,7 +87,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       { availableQty: newQty }
     );
 
-    const updatedBatch = await batches.findOne({ _id: batch._id });
+    const updatedBatch = await batches.findOne({ _id: batch._id } as any);
 
     return res.status(200).json({
       success: true,

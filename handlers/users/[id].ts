@@ -22,7 +22,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const userId = new ObjectId(id);
 
     if (req.method === 'GET') {
-      const foundUser = await users.findOne({ _id: userId });
+      const foundUser = await users.findOne({ _id: userId } as any);
       if (!foundUser) {
         return res.status(404).json({ success: false, error: 'User not found' });
       }
@@ -32,7 +32,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (req.method === 'PATCH') {
-      const existingUser = await users.findOne({ _id: userId });
+      const existingUser = await users.findOne({ _id: userId } as any);
       if (!existingUser) {
         return res.status(404).json({ success: false, error: 'User not found' });
       }
@@ -48,8 +48,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         updateData.hash = await bcrypt.hash(validated.password, 10);
       }
 
-      await users.updateOne({ _id: userId }, { $set: updateData });
-      const updatedUser = await users.findOne({ _id: userId });
+      await users.updateOne({ _id: userId } as any, { $set: updateData });
+      const updatedUser = await users.findOne({ _id: userId } as any);
 
       await logAudit(
         user._id!,
@@ -65,12 +65,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (req.method === 'DELETE') {
-      const existingUser = await users.findOne({ _id: userId });
+      const existingUser = await users.findOne({ _id: userId } as any);
       if (!existingUser) {
         return res.status(404).json({ success: false, error: 'User not found' });
       }
 
-      await users.deleteOne({ _id: userId });
+      await users.deleteOne({ _id: userId } as any);
 
       await logAudit(
         user._id!,

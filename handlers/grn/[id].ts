@@ -26,7 +26,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const grns = await getCollection<GRN>('grns');
     const grnId = new ObjectId(id);
 
-    const grn = await grns.findOne({ _id: grnId });
+    const grn = await grns.findOne({ _id: grnId } as any);
     if (!grn) {
       return res.status(404).json({ success: false, error: 'GRN not found' });
     }

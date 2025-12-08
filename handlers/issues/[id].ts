@@ -26,7 +26,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const issues = await getCollection<IssueRequest>('issue_requests');
     const issueId = new ObjectId(id);
 
-    const issue = await issues.findOne({ _id: issueId });
+    const issue = await issues.findOne({ _id: issueId } as any);
     if (!issue) {
       return res.status(404).json({ success: false, error: 'Issue request not found' });
     }

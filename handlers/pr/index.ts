@@ -40,7 +40,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       };
 
       const result = await prs.insertOne(newPR as PurchaseRequisition);
-      const insertedPR = await prs.findOne({ _id: result.insertedId });
+      const insertedPR = await prs.findOne({ _id: result.insertedId } as any);
 
       await logAudit(
         user._id!,

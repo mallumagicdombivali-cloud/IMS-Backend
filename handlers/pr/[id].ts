@@ -26,7 +26,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const prs = await getCollection<PurchaseRequisition>('purchase_requisitions');
     const prId = new ObjectId(id);
 
-    const pr = await prs.findOne({ _id: prId });
+    const pr = await prs.findOne({ _id: prId } as any);
     if (!pr) {
       return res.status(404).json({ success: false, error: 'PR not found' });
     }

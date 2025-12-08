@@ -33,7 +33,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       };
 
       const result = await departments.insertOne(newDept as Department);
-      const insertedDept = await departments.findOne({ _id: result.insertedId });
+      const insertedDept = await departments.findOne({ _id: result.insertedId } as any);
 
       await logAudit(
         user._id!,

@@ -26,7 +26,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const stockLedger = await getCollection<StockLedger>('stock_ledger');
     const issueId = new ObjectId(id);
 
-    const issue = await issues.findOne({ _id: issueId });
+    const issue = await issues.findOne({ _id: issueId } as any);
     if (!issue) {
       return res.status(404).json({ success: false, error: 'Issue request not found' });
     }
@@ -106,7 +106,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Update issue status
     await issues.updateOne(
-      { _id: issueId },
+      { _id: issueId } as any,
       {
         $set: {
           status: 'issued',
@@ -117,7 +117,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     );
 
-    const updatedIssue = await issues.findOne({ _id: issueId });
+    const updatedIssue = await issues.findOne({ _id: issueId } as any);
 
     await logAudit(
       user._id!,

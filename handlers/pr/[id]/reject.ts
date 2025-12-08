@@ -27,7 +27,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const prs = await getCollection<PurchaseRequisition>('purchase_requisitions');
     const prId = new ObjectId(id);
 
-    const pr = await prs.findOne({ _id: prId });
+    const pr = await prs.findOne({ _id: prId } as any);
     if (!pr) {
       return res.status(404).json({ success: false, error: 'PR not found' });
     }
@@ -37,7 +37,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     await prs.updateOne(
-      { _id: prId },
+      { _id: prId } as any,
       {
         $set: {
           status: 'rejected',
@@ -47,7 +47,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     );
 
-    const updatedPR = await prs.findOne({ _id: prId });
+    const updatedPR = await prs.findOne({ _id: prId } as any);
 
     await logAudit(
       user._id!,

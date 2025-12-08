@@ -26,7 +26,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const batches = await getCollection<ItemBatch>('item_batches');
     const batchId = new ObjectId(id);
 
-    const batch = await batches.findOne({ _id: batchId });
+    const batch = await batches.findOne({ _id: batchId } as any);
     if (!batch) {
       return res.status(404).json({ success: false, error: 'Batch not found' });
     }

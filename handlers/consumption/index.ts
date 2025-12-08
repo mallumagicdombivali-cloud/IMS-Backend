@@ -25,7 +25,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(400).json({ success: false, error: 'Invalid batch ID' });
       }
 
-      const batch = await batches.findOne({ _id: new ObjectId(validated.batchId) });
+      const batch = await batches.findOne({ _id: new ObjectId(validated.batchId) } as any);
       if (!batch) {
         return res.status(404).json({ success: false, error: 'Batch not found' });
       }
@@ -82,7 +82,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       await stockLedger.insertOne(ledgerEntry as StockLedger);
 
-      const insertedLog = await consumptionLogs.findOne({ _id: result.insertedId });
+      const insertedLog = await consumptionLogs.findOne({ _id: result.insertedId } as any);
 
       await logAudit(
         user._id!,

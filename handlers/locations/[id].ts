@@ -21,7 +21,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const locationId = new ObjectId(id);
 
     if (req.method === 'PATCH') {
-      const existingLocation = await locations.findOne({ _id: locationId });
+      const existingLocation = await locations.findOne({ _id: locationId } as any);
       if (!existingLocation) {
         return res.status(404).json({ success: false, error: 'Location not found' });
       }
@@ -34,8 +34,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (validated.address !== undefined) updateData.address = validated.address;
       if (req.body.isActive !== undefined) updateData.isActive = req.body.isActive;
 
-      await locations.updateOne({ _id: locationId }, { $set: updateData });
-      const updatedLocation = await locations.findOne({ _id: locationId });
+      await locations.updateOne({ _id: locationId } as any, { $set: updateData });
+      const updatedLocation = await locations.findOne({ _id: locationId } as any);
 
       await logAudit(
         user._id!,
@@ -50,13 +50,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (req.method === 'DELETE') {
-      const existingLocation = await locations.findOne({ _id: locationId });
+      const existingLocation = await locations.findOne({ _id: locationId } as any);
       if (!existingLocation) {
         return res.status(404).json({ success: false, error: 'Location not found' });
       }
 
       await locations.updateOne(
-        { _id: locationId },
+        { _id: locationId } as any,
         { $set: { isActive: false, updatedAt: new Date() } }
       );
 

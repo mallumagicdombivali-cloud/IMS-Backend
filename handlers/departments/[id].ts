@@ -21,7 +21,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const deptId = new ObjectId(id);
 
     if (req.method === 'PATCH') {
-      const existingDept = await departments.findOne({ _id: deptId });
+      const existingDept = await departments.findOne({ _id: deptId } as any);
       if (!existingDept) {
         return res.status(404).json({ success: false, error: 'Department not found' });
       }
@@ -34,8 +34,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (validated.hodId !== undefined) updateData.hodId = validated.hodId;
       if (req.body.isActive !== undefined) updateData.isActive = req.body.isActive;
 
-      await departments.updateOne({ _id: deptId }, { $set: updateData });
-      const updatedDept = await departments.findOne({ _id: deptId });
+      await departments.updateOne({ _id: deptId } as any, { $set: updateData });
+      const updatedDept = await departments.findOne({ _id: deptId } as any);
 
       await logAudit(
         user._id!,
@@ -50,13 +50,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (req.method === 'DELETE') {
-      const existingDept = await departments.findOne({ _id: deptId });
+      const existingDept = await departments.findOne({ _id: deptId } as any);
       if (!existingDept) {
         return res.status(404).json({ success: false, error: 'Department not found' });
       }
 
       await departments.updateOne(
-        { _id: deptId },
+        { _id: deptId } as any,
         { $set: { isActive: false, updatedAt: new Date() } }
       );
 
