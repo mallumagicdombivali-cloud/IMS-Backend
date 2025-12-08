@@ -177,7 +177,9 @@ curl -X POST http://localhost:3000/api/auth/login \
 
 ```
 backend/
-├── api/                    # API route handlers
+├── api/                    # Vercel serverless function entry point
+│   └── index.ts           # Main router (consolidates all routes)
+├── handlers/              # Route handler implementations
 │   ├── auth/              # Authentication endpoints
 │   ├── users/             # User management
 │   ├── items/             # Item management
@@ -417,6 +419,8 @@ For detailed development guide, see [DEVELOPMENT.md](./DEVELOPMENT.md).
 
 ### Deploy to Vercel
 
+**Important:** This project uses a consolidated router (`api/index.ts`) to stay within Vercel's Hobby plan limit of 12 serverless functions. All API routes are handled through a single function.
+
 1. **Install Vercel CLI**:
    ```bash
    npm install -g vercel
@@ -437,6 +441,14 @@ For detailed development guide, see [DEVELOPMENT.md](./DEVELOPMENT.md).
    - `JWT_SECRET`
    - `JWT_REFRESH_SECRET`
    - `DB_NAME` (optional)
+
+### Vercel Function Limit
+
+The project is optimized for Vercel's Hobby plan (12 function limit) by using a single consolidated router (`api/index.ts`) that handles all routes internally. This means:
+- ✅ Only **1 serverless function** is created (stays within limit)
+- ✅ All API endpoints still work exactly the same
+- ✅ No changes needed to your API calls
+- ✅ Local development unchanged (uses Express server)
 
 ### Environment Variables
 

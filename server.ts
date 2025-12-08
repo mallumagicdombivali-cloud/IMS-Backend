@@ -73,7 +73,9 @@ function createVercelResponse(res: express.Response): any {
 
 // Load and register API routes
 async function loadRoutes() {
-  const apiDir = path.join(__dirname, 'api');
+  // For local dev, load from handlers directory
+  // For Vercel, only api/index.ts is used (which imports from handlers)
+  const handlersDir = path.join(__dirname, 'handlers');
   
   // Recursively find all route files (both .ts and .js)
   function findRouteFiles(dir: string, basePath: string = ''): string[] {
@@ -105,12 +107,17 @@ async function loadRoutes() {
     return files;
   }
 
-  const routeFiles = findRouteFiles(apiDir);
+  const routeFiles = findRouteFiles(handlersDir);
+  
+  if (routeFiles.length === 0) {
+    console.log('  ⚠️  No route files found in handlers directory');
+    return;
+  }
 
   for (const file of routeFiles) {
     try {
       // Use absolute path for import
-      const filePath = path.join(apiDir, file);
+      const filePath = path.join(handlersDir, file);
       const filePathWithoutExt = filePath.replace(/\.(ts|js)$/, '');
       
       // Use dynamic import which respects TypeScript path aliases
