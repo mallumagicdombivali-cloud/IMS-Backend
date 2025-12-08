@@ -3,24 +3,29 @@ import express from 'express';
 import path from 'path';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
+import cors from 'cors'; // Make sure to import cors
 
-const app = express();
-const cors = require('cors');
+// --- 1. Define Helper to run Middleware in Vercel ---
+function runMiddleware(req: VercelRequest, res: VercelResponse, fn: Function) {
+  return new Promise((resolve, reject) => {
+    fn(req, res, (result: any) => {
+      if (result instanceof Error) {
+        return reject(result);
+      }
+      return resolve(result);
+    });
+  });
+}
 
+// --- 2. Configure CORS Options ---
 const corsOptions = {
-  origin: 'http://localhost:3000', // Allow only this specific origin
-  methods: ['GET', 'POST'], // Allow specific HTTP methods
-  allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
+  origin: ['http://localhost:3000', 'https://your-production-domain.com'], // Add your prod domain here
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // OPTIONS is required for preflight
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  credentials: true,
 };
 
-app.use(cors(corsOptions)); // Enables CORS with specified options
-
-const spec = YAML.load(path.join(__dirname, '../docs/openapi.yaml'));
-
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(spec));
-
-
-// Import all route handlers from handlers directory
+// Import all route handlers
 import loginHandler from '../handlers/auth/login';
 import logoutHandler from '../handlers/auth/logout';
 import meHandler from '../handlers/auth/me';
@@ -88,6 +93,10 @@ import systemCheckExpiryHandler from '../handlers/system/check-expiry';
 import systemGenerateReportsHandler from '../handlers/system/generate-reports';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // --- 3. APPLY CORS HERE ---
+  // This executes the cors middleware against the Vercel request/response objects
+  await runMiddleware(req, res, cors(corsOptions));
+
   const path = req.url || '';
   const method = req.method || 'GET';
   
@@ -316,4 +325,3 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // 404 Not Found
   return res.status(404).json({ success: false, error: 'Route not found' });
 }
-
