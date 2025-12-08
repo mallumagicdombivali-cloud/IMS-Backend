@@ -5,6 +5,16 @@ import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 
 const app = express();
+const cors = require('cors');
+
+const corsOptions = {
+  origin: 'http://localhost:3000', // Allow only this specific origin
+  methods: ['GET', 'POST'], // Allow specific HTTP methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
+};
+
+app.use(cors(corsOptions)); // Enables CORS with specified options
+
 const spec = YAML.load(path.join(__dirname, '../docs/openapi.yaml'));
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(spec));
