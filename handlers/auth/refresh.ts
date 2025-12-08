@@ -1,8 +1,8 @@
-import { VercelRequest, VercelResponse } from '@/types/vercel';
-import { verifyRefreshToken, generateToken, generateRefreshToken, setAuthCookie } from '@/lib/auth';
-import { parseCookies } from '@/lib/cookies';
-import { getCollection } from '@/lib/db';
-import { User } from '@/types';
+import { VercelRequest, VercelResponse } from '../../types/vercel';
+import { verifyRefreshToken, generateToken, generateRefreshToken, setAuthCookie } from '../../lib/auth';
+import { parseCookies } from '../../lib/cookies';
+import { getCollection } from '../../lib/db';
+import { User } from '../../types';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {

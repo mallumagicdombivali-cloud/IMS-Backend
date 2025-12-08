@@ -1,10 +1,10 @@
-import { VercelRequest, VercelResponse } from '@/types/vercel';
-import { connectDB } from '@/lib/db';
-import { requireRole } from '@/lib/rbac';
-import { approvePRSchema } from '@/lib/validations';
-import { logAudit } from '@/lib/audit';
-import { getCollection } from '@/lib/db';
-import { PurchaseRequisition } from '@/types';
+import { VercelRequest, VercelResponse } from '../../../types/vercel';
+import { connectDB } from '../../../lib/db';
+import { requireRole } from '../../../lib/rbac';
+import { approvePRSchema } from '../../../lib/validations';
+import { logAudit } from '../../../lib/audit';
+import { getCollection } from '../../../lib/db';
+import { PurchaseRequisition } from '../../../types';
 import { ObjectId } from 'mongodb';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {

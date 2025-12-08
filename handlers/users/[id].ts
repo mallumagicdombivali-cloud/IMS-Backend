@@ -1,11 +1,11 @@
-import { VercelRequest, VercelResponse } from '@/types/vercel';
-import { connectDB } from '@/lib/db';
-import { requireRole } from '@/lib/rbac';
-import { updateUserSchema } from '@/lib/validations';
-import { logAudit } from '@/lib/audit';
+import { VercelRequest, VercelResponse } from '../../types/vercel';
+import { connectDB } from '../../lib/db';
+import { requireRole } from '../../lib/rbac';
+import { updateUserSchema } from '../../lib/validations';
+import { logAudit } from '../../lib/audit';
 import bcrypt from 'bcrypt';
-import { getCollection } from '@/lib/db';
-import { User } from '@/types';
+import { getCollection } from '../../lib/db';
+import { User } from '../../types';
 import { ObjectId } from 'mongodb';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {

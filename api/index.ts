@@ -1,4 +1,4 @@
-import { VercelRequest, VercelResponse } from '@/types/vercel';
+import { VercelRequest, VercelResponse } from '../types/vercel';
 
 // Import all route handlers from handlers directory
 import loginHandler from '../handlers/auth/login';

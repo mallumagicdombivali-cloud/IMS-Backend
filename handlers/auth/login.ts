@@ -1,10 +1,10 @@
-import { VercelRequest, VercelResponse } from '@/types/vercel';
-import { connectDB } from '@/lib/db';
-import { generateToken, generateRefreshToken, setAuthCookie } from '@/lib/auth';
-import { loginSchema } from '@/lib/validations';
+import { VercelRequest, VercelResponse } from '../../types/vercel';
+import { connectDB } from '../../lib/db';
+import { generateToken, generateRefreshToken, setAuthCookie } from '../../lib/auth';
+import { loginSchema } from '../../lib/validations';
 import bcrypt from 'bcrypt';
-import { getCollection } from '@/lib/db';
-import { User } from '@/types';
+import { getCollection } from '../../lib/db';
+import { User } from '../../types';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {

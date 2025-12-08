@@ -1,7 +1,7 @@
-import { VercelRequest, VercelResponse } from '@/types/vercel';
-import { connectDB } from '@/lib/db';
-import { requireRole } from '@/lib/rbac';
-import { getAuditLogs } from '@/lib/audit';
+import { VercelRequest, VercelResponse } from '../../types/vercel';
+import { connectDB } from '../../lib/db';
+import { requireRole } from '../../lib/rbac';
+import { getAuditLogs } from '../../lib/audit';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') {

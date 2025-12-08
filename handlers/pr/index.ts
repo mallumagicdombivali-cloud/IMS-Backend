@@ -1,10 +1,10 @@
-import { VercelRequest, VercelResponse } from '@/types/vercel';
-import { connectDB } from '@/lib/db';
-import { verifyToken } from '@/lib/auth';
-import { createPRSchema } from '@/lib/validations';
-import { logAudit } from '@/lib/audit';
-import { getCollection } from '@/lib/db';
-import { PurchaseRequisition } from '@/types';
+import { VercelRequest, VercelResponse } from '../../types/vercel';
+import { connectDB } from '../../lib/db';
+import { verifyToken } from '../../lib/auth';
+import { createPRSchema } from '../../lib/validations';
+import { logAudit } from '../../lib/audit';
+import { getCollection } from '../../lib/db';
+import { PurchaseRequisition } from '../../types';
 import { ObjectId } from 'mongodb';
 
 async function generatePRNumber(): Promise<string> {

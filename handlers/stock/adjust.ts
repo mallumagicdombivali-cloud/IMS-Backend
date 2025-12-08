@@ -1,10 +1,10 @@
-import { VercelRequest, VercelResponse } from '@/types/vercel';
-import { connectDB } from '@/lib/db';
-import { verifyToken } from '@/lib/auth';
-import { stockAdjustSchema } from '@/lib/validations';
-import { logAudit } from '@/lib/audit';
-import { getCollection } from '@/lib/db';
-import { ItemBatch, StockLedger } from '@/types';
+import { VercelRequest, VercelResponse } from '../../types/vercel';
+import { connectDB } from '../../lib/db';
+import { verifyToken } from '../../lib/auth';
+import { stockAdjustSchema } from '../../lib/validations';
+import { logAudit } from '../../lib/audit';
+import { getCollection } from '../../lib/db';
+import { ItemBatch, StockLedger } from '../../types';
 import { ObjectId } from 'mongodb';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {

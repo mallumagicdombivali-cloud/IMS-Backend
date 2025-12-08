@@ -1,8 +1,8 @@
-import { VercelRequest, VercelResponse } from '@/types/vercel';
-import { connectDB } from '@/lib/db';
-import { verifyToken } from '@/lib/auth';
-import { getCollection } from '@/lib/db';
-import { IssueRequest } from '@/types';
+import { VercelRequest, VercelResponse } from '../../types/vercel';
+import { connectDB } from '../../lib/db';
+import { verifyToken } from '../../lib/auth';
+import { getCollection } from '../../lib/db';
+import { IssueRequest } from '../../types';
 import { ObjectId } from 'mongodb';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {

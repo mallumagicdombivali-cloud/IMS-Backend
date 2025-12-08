@@ -1,8 +1,8 @@
-import { VercelRequest, VercelResponse } from '@/types/vercel';
-import { connectDB } from '@/lib/db';
-import { requireRole } from '@/lib/rbac';
-import { getCollection } from '@/lib/db';
-import { AuditLog } from '@/types';
+import { VercelRequest, VercelResponse } from '../../types/vercel';
+import { connectDB } from '../../lib/db';
+import { requireRole } from '../../lib/rbac';
+import { getCollection } from '../../lib/db';
+import { AuditLog } from '../../types';
 import { ObjectId } from 'mongodb';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {

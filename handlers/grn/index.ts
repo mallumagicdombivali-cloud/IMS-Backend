@@ -1,10 +1,10 @@
-import { VercelRequest, VercelResponse } from '@/types/vercel';
-import { connectDB } from '@/lib/db';
-import { requireRole } from '@/lib/rbac';
-import { createGRNSchema } from '@/lib/validations';
-import { logAudit } from '@/lib/audit';
-import { getCollection } from '@/lib/db';
-import { GRN, ItemBatch, StockLedger, PurchaseOrder } from '@/types';
+import { VercelRequest, VercelResponse } from '../../types/vercel';
+import { connectDB } from '../../lib/db';
+import { requireRole } from '../../lib/rbac';
+import { createGRNSchema } from '../../lib/validations';
+import { logAudit } from '../../lib/audit';
+import { getCollection } from '../../lib/db';
+import { GRN, ItemBatch, StockLedger, PurchaseOrder } from '../../types';
 import { ObjectId } from 'mongodb';
 
 async function generateGRNNumber(): Promise<string> {
