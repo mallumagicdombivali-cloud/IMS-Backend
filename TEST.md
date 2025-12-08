@@ -25,22 +25,6 @@
 }
 ```
 
-**Postman Setup:**
-- **IMPORTANT:** Add this to the **Tests** tab of your login request:
-```javascript
-if (pm.response.code === 200) {
-    const jsonData = pm.response.json();
-    if (jsonData.success && jsonData.data.token) {
-        pm.environment.set("token", jsonData.data.token);
-        console.log("✅ Token saved!");
-    }
-}
-```
-- Then use `{{token}}` in Authorization → Bearer Token for all other requests
-- See [POSTMAN_SETUP.md](./POSTMAN_SETUP.md) for detailed instructions
-
----
-
 ### 2. Get Current User
 **GET** `/api/auth/me`
 

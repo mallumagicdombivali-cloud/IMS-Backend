@@ -1,0 +1,1223 @@
+openapi: 3.0.0
+info:
+  title: Inventory Management System API
+  description: API documentation for the Inventory Management System covering Auth, Users, Items, Stock, Procurement, and Reports.
+  version: 1.0.0
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+servers:
+  - url: https://ims-backend-pied.vercel.app
+    description: Production Server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: token
+
+  schemas:
+    # --- Common Wrappers ---
+    StandardResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          example: "Invalid request parameters"
+
+    # --- Domain Schemas ---
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+        departmentId:
+          type: string
+
+    Item:
+      type: object
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+        unit:
+          type: string
+        minStock:
+          type: integer
+        reorderLevel:
+          type: integer
+
+    StockAdjustment:
+      type: object
+      properties:
+        itemId:
+          type: string
+        batchId:
+          type: string
+        locationId:
+          type: string
+        quantity:
+          type: number
+          description: Positive to add, negative to deduct
+        reason:
+          type: string
+        notes:
+          type: string
+
+    PurchaseRequisition:
+      type: object
+      properties:
+        departmentId:
+          type: string
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              itemId: { type: string }
+              quantity: { type: number }
+              unit: { type: string }
+              purpose: { type: string }
+              priority: { type: string }
+
+    PurchaseOrder:
+      type: object
+      properties:
+        prId:
+          type: string
+        supplierId:
+          type: string
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              itemId: { type: string }
+              quantity: { type: number }
+              unitPrice: { type: number }
+              unit: { type: string }
+        expectedDeliveryDate:
+          type: string
+          format: date-time
+
+security:
+  - bearerAuth: []
+  - cookieAuth: []
+
+paths:
+  # ==========================
+  # AUTHENTICATION
+  # ==========================
+  /api/auth/login:
+    post:
+      summary: User Login
+      operationId: loginUser
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/me:
+    get:
+      summary: Get Current User
+      operationId: getCurrentUser
+      tags: [Authentication]
+      responses:
+        '200':
+          description: Current user details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/refresh:
+    post:
+      summary: Refresh Token
+      operationId: refreshToken
+      tags: [Authentication]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken: { type: string }
+      responses:
+        '200':
+          description: Token refreshed
+        '400':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/logout:
+    post:
+      summary: Logout
+      operationId: logoutUser
+      tags: [Authentication]
+      responses:
+        '200':
+          description: Logged out successfully
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ==========================
+  # USER MANAGEMENT
+  # ==========================
+  /api/users:
+    get:
+      summary: List Users
+      operationId: listUsers
+      tags: [Users]
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer }
+        - in: query
+          name: limit
+          schema: { type: integer }
+        - in: query
+          name: role
+          schema: { type: string }
+        - in: query
+          name: departmentId
+          schema: { type: string }
+      responses:
+        '200':
+          description: List of users
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      summary: Create User
+      operationId: createUser
+      tags: [Users]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: User Created
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/users/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+    get:
+      summary: Get User by ID
+      operationId: getUserById
+      tags: [Users]
+      responses:
+        '200':
+          description: User details
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    patch:
+      summary: Update User
+      operationId: updateUser
+      tags: [Users]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                role: { type: string }
+                departmentId: { type: string }
+      responses:
+        '200':
+          description: User updated
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: Delete User
+      operationId: deleteUser
+      tags: [Users]
+      responses:
+        '200':
+          description: User deleted
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ==========================
+  # ITEM MANAGEMENT
+  # ==========================
+  /api/items:
+    get:
+      summary: List Items
+      operationId: listItems
+      tags: [Items]
+      parameters:
+        - in: query
+          name: category
+          schema: { type: string }
+        - in: query
+          name: search
+          schema: { type: string }
+      responses:
+        '200':
+          description: List of items
+        '400':
+          description: Invalid Query
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      summary: Create Item
+      operationId: createItem
+      tags: [Items]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Item'
+      responses:
+        '201':
+          description: Item created
+        '400':
+          description: Invalid Input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/items/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+    get:
+      summary: Get Item by ID
+      operationId: getItemById
+      tags: [Items]
+      responses:
+        '200':
+          description: Item details
+        '404':
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    patch:
+      summary: Update Item
+      operationId: updateItem
+      tags: [Items]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                minStock: { type: integer }
+      responses:
+        '200':
+          description: Item updated
+        '404':
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: Delete Item
+      operationId: deleteItem
+      tags: [Items]
+      responses:
+        '200':
+          description: Item deleted
+        '404':
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/items/{itemId}/batches:
+    get:
+      summary: Get Item Batches
+      operationId: getItemBatches
+      tags: [Items]
+      parameters:
+        - in: path
+          name: itemId
+          required: true
+          schema: { type: string }
+        - in: query
+          name: locationId
+          schema: { type: string }
+      responses:
+        '200':
+          description: Batch list
+        '404':
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ==========================
+  # BATCH & STOCK
+  # ==========================
+  /api/batches/{id}:
+    get:
+      summary: Get Batch by ID
+      operationId: getBatchById
+      tags: [Stock]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Batch details
+        '404':
+          description: Batch not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/stock/adjust:
+    post:
+      summary: Stock Adjustment
+      operationId: adjustStock
+      tags: [Stock]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StockAdjustment'
+      responses:
+        '200':
+          description: Stock adjusted
+        '400':
+          description: Invalid Adjustment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ==========================
+  # PROCUREMENT (PR, PO, GRN)
+  # ==========================
+  /api/pr:
+    post:
+      summary: Create Purchase Requisition (PR)
+      operationId: createPr
+      tags: [Procurement]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurchaseRequisition'
+      responses:
+        '201':
+          description: PR Created
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      summary: List PRs
+      operationId: listPrs
+      tags: [Procurement]
+      parameters:
+        - in: query
+          name: status
+          schema: { type: string, enum: [pending, approved, rejected, converted] }
+        - in: query
+          name: departmentId
+          schema: { type: string }
+      responses:
+        '200':
+          description: List of PRs
+        '400':
+          description: Invalid Filter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/pr/{id}:
+    get:
+      summary: Get PR by ID
+      operationId: getPrById
+      tags: [Procurement]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: PR Details
+        '404':
+          description: PR Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/pr/{id}/approve:
+    post:
+      summary: Approve PR
+      operationId: approvePr
+      tags: [Procurement]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: PR Approved
+        '404':
+          description: PR Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/pr/{id}/reject:
+    post:
+      summary: Reject PR
+      operationId: rejectPr
+      tags: [Procurement]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rejectionReason: { type: string }
+      responses:
+        '200':
+          description: PR Rejected
+        '404':
+          description: PR Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/po:
+    post:
+      summary: Create Purchase Order (PO)
+      operationId: createPo
+      tags: [Procurement]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurchaseOrder'
+      responses:
+        '201':
+          description: PO Created
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      summary: List POs
+      operationId: listPos
+      tags: [Procurement]
+      parameters:
+        - in: query
+          name: status
+          schema: { type: string }
+        - in: query
+          name: supplierId
+          schema: { type: string }
+      responses:
+        '200':
+          description: List of POs
+        '400':
+          description: Invalid Filter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/po/{id}/approve:
+    post:
+      summary: Approve PO
+      operationId: approvePo
+      tags: [Procurement]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: PO Approved
+        '404':
+          description: PO Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/po/{id}/send:
+    post:
+      summary: Send PO
+      operationId: sendPo
+      tags: [Procurement]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: PO Sent
+        '404':
+          description: PO Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/po/{id}/cancel:
+    post:
+      summary: Cancel PO
+      operationId: cancelPo
+      tags: [Procurement]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cancellationReason: { type: string }
+      responses:
+        '200':
+          description: PO Cancelled
+        '404':
+          description: PO Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/grn:
+    post:
+      summary: Create Goods Receipt Note (GRN)
+      operationId: createGrn
+      tags: [Procurement]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                poId: { type: string }
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      itemId: { type: string }
+                      batchNumber: { type: string }
+                      quantity: { type: number }
+                      locationId: { type: string }
+                      expiryDate: { type: string, format: date-time }
+      responses:
+        '201':
+          description: GRN Created
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/grn/{id}:
+    get:
+      summary: Get GRN by ID
+      operationId: getGrnById
+      tags: [Procurement]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: GRN Details
+        '404':
+          description: GRN Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ==========================
+  # ISSUES & RETURNS
+  # ==========================
+  /api/issues:
+    post:
+      summary: Create Issue Request
+      operationId: createIssueRequest
+      tags: [Issues]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                departmentId: { type: string }
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      itemId: { type: string }
+                      quantity: { type: number }
+      responses:
+        '201':
+          description: Issue Request Created
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      summary: List Issue Requests
+      operationId: listIssueRequests
+      tags: [Issues]
+      parameters:
+        - in: query
+          name: status
+          schema: { type: string }
+        - in: query
+          name: departmentId
+          schema: { type: string }
+      responses:
+        '200':
+          description: List of requests
+        '400':
+          description: Invalid Query
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/issues/{id}/approve:
+    post:
+      summary: Approve Issue Request
+      operationId: approveIssueRequest
+      tags: [Issues]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Approved
+        '404':
+          description: Issue Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/issues/{id}/issue:
+    post:
+      summary: Issue Items (Deduct Stock)
+      operationId: executeIssue
+      tags: [Issues]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Items Issued
+        '404':
+          description: Issue Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/returns:
+    post:
+      summary: Create Return Request
+      operationId: createReturn
+      tags: [Issues]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                issueId: { type: string }
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      itemId: { type: string }
+                      batchId: { type: string }
+                      quantity: { type: number }
+      responses:
+        '201':
+          description: Return Created
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/returns/{id}/approve:
+    post:
+      summary: Approve Return (Restock)
+      operationId: approveReturn
+      tags: [Issues]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Return Approved
+        '404':
+          description: Return Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ==========================
+  # CONSUMPTION
+  # ==========================
+  /api/consumption:
+    post:
+      summary: Log Consumption
+      operationId: logConsumption
+      tags: [Consumption]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                itemId: { type: string }
+                batchId: { type: string }
+                actualQty: { type: number }
+                theoreticalQty: { type: number }
+      responses:
+        '201':
+          description: Log Created
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      summary: List Consumption Logs
+      operationId: listConsumptionLogs
+      tags: [Consumption]
+      parameters:
+        - in: query
+          name: itemId
+          schema: { type: string }
+        - in: query
+          name: from
+          schema: { type: string, format: date }
+        - in: query
+          name: to
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: Logs List
+        '400':
+          description: Invalid Query
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/consumption/variance:
+    get:
+      summary: Get Variance Report
+      operationId: getVarianceReport
+      tags: [Consumption]
+      parameters:
+        - in: query
+          name: itemId
+          schema: { type: string }
+      responses:
+        '200':
+          description: Variance Report
+        '400':
+          description: Invalid Query
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ==========================
+  # REPORTS
+  # ==========================
+  /api/reports/stock:
+    get:
+      summary: Stock Balance Report
+      operationId: getStockReport
+      tags: [Reports]
+      parameters:
+        - in: query
+          name: locationId
+          schema: { type: string }
+      responses:
+        '200':
+          description: Stock Report
+        '400':
+          description: Invalid Query
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/reports/valuation:
+    get:
+      summary: Stock Valuation Report
+      operationId: getValuationReport
+      tags: [Reports]
+      parameters:
+        - in: query
+          name: method
+          schema: { type: string, enum: [fifo, lifo, wa] }
+      responses:
+        '200':
+          description: Valuation Report
+        '400':
+          description: Invalid Method
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/reports/expiry:
+    get:
+      summary: Expiry Report
+      operationId: getExpiryReport
+      tags: [Reports]
+      parameters:
+        - in: query
+          name: days
+          schema: { type: integer, default: 30 }
+      responses:
+        '200':
+          description: Expiry Report
+        '400':
+          description: Invalid Parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/reports/supplier-performance:
+    get:
+      summary: Supplier Performance Report
+      operationId: getSupplierPerformance
+      tags: [Reports]
+      responses:
+        '200':
+          description: Performance Metrics
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ==========================
+  # MASTER DATA
+  # ==========================
+  /api/departments:
+    get:
+      summary: List Departments
+      operationId: listDepartments
+      tags: [Master Data]
+      responses:
+        '200':
+          description: List departments
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      summary: Create Department
+      operationId: createDepartment
+      tags: [Master Data]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                code: { type: string }
+                hodId: { type: string }
+      responses:
+        '201':
+          description: Created
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/locations:
+    get:
+      summary: List Locations
+      operationId: listLocations
+      tags: [Master Data]
+      responses:
+        '200':
+          description: List locations
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      summary: Create Location
+      operationId: createLocation
+      tags: [Master Data]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                code: { type: string }
+                address: { type: string }
+      responses:
+        '201':
+          description: Created
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/suppliers:
+    get:
+      summary: List Suppliers
+      operationId: listSuppliers
+      tags: [Master Data]
+      responses:
+        '200':
+          description: List suppliers
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      summary: Create Supplier
+      operationId: createSupplier
+      tags: [Master Data]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                email: { type: string, format: email }
+                contactPerson: { type: string }
+      responses:
+        '201':
+          description: Created
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ==========================
+  # SYSTEM AUTOMATION
+  # ==========================
+  /api/system/check-reorder:
+    get:
+      summary: Check Reorder Levels
+      operationId: checkReorderLevels
+      tags: [System]
+      responses:
+        '200':
+          description: Low stock items
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: System Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/system/check-expiry:
+    get:
+      summary: Check Expiry
+      operationId: checkSystemExpiry
+      tags: [System]
+      parameters:
+        - in: query
+          name: days
+          schema: { type: integer, default: 30 }
+      responses:
+        '200':
+          description: Expiry check result
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: System Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
