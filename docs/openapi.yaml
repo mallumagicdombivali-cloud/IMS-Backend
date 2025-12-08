@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
-  title: Inventory Management System API
-  description: API documentation for the Inventory Management System covering Auth, Users, Items, Stock, Procurement, and Reports.
+  title: Mallu Magic IMS API
+  description: API documentation for the Mallu Magic Inventory Management System covering Auth, Users, Items, Stock, Procurement, and Reports.
   version: 1.0.0
   license:
     name: MIT

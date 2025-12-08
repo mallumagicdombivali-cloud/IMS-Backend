@@ -1,4 +1,14 @@
 import { VercelRequest, VercelResponse } from '../types/vercel';
+import express from 'express';
+import path from 'path';
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yamljs';
+
+const app = express();
+const spec = YAML.load(path.join(__dirname, '../docs/openapi.yaml'));
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(spec));
+
 
 // Import all route handlers from handlers directory
 import loginHandler from '../handlers/auth/login';
