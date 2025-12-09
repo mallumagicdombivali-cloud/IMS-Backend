@@ -4,6 +4,7 @@ import path from 'path';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 import cors from 'cors'; // Make sure to import cors
+import seedHandler from '../handlers/system/seed';
 
 // --- 1. Define Helper to run Middleware in Vercel ---
 function runMiddleware(req: VercelRequest, res: VercelResponse, fn: Function) {
@@ -147,6 +148,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     '/api/system/check-reorder': systemCheckReorderHandler,
     '/api/system/check-expiry': systemCheckExpiryHandler,
     '/api/system/generate-reports': systemGenerateReportsHandler,
+    '/api/system/seed': seedHandler,
     
     // Stock
     '/api/stock/adjust': stockAdjustHandler,
