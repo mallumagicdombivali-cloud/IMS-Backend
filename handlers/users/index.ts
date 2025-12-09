@@ -13,6 +13,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const user = await requireRole(['admin'])(req, res);
 
     if (req.method === 'POST') {
+        if (typeof req.body === 'string') {
+            req.body = JSON.parse(req.body);
+        }
       const validated = createUserSchema.parse(req.body);
       const db = await connectDB();
       const users = await getCollection<User>('users');
