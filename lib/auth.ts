@@ -56,67 +56,48 @@ export function clearAuthCookie(res: VercelResponse): void {
 
 export async function verifyToken(req: VercelRequest, res: VercelResponse): Promise<User | null> {
   try {
-    // Parse cookies from header if not already parsed
     const cookies = req.cookies || parseCookies(req.headers.cookie || '');
-    
-    // Get Authorization header (Express normalizes to lowercase)
     const authHeader = req.headers.authorization || (req.headers as any).Authorization;
     
-    // Extract token from header (handle "Bearer token" or just "token")
     let tokenFromHeader = '';
     if (authHeader) {
-      // Remove "Bearer " prefix if present (case insensitive)
       tokenFromHeader = authHeader.replace(/^Bearer\s+/i, '').trim();
     }
     
-    // Try cookies first, then header
-    const token = cookies.token || tokenFromHeader;
+    const token = tokenFromHeader || cookies.token;
 
-    console.log('Token check:', {
-      hasCookies: !!cookies.token,
-      hasAuthHeader: !!authHeader,
-      tokenFromHeader: tokenFromHeader ? tokenFromHeader.substring(0, 20) + '...' : 'none',
-      finalToken: token ? token.substring(0, 20) + '...' : 'none',
+    console.log('Token logic:', {
+        source: tokenFromHeader ? 'Header' : (cookies.token ? 'Cookie' : 'None'),
+        tokenPart: token ? token.substring(0, 10) + '...' : 'null'
     });
 
     if (!token) {
-      console.log('❌ No token found');
+      console.log('No token found');
       return null;
     }
 
     // Verify JWT token
     const payload = verifyJWTToken(token);
-    console.log('✅ Token verified, userId:', payload.userId);
     
     // Get user from database
     const users = await getCollection<User>('users');
-    // Convert string userId to ObjectId for MongoDB query
+    
     if (!ObjectId.isValid(payload.userId)) {
-      console.log('❌ Invalid userId format:', payload.userId);
+      console.log('Invalid userId format:', payload.userId);
       return null;
     }
+
     const userId = new ObjectId(payload.userId);
     const user = await users.findOne({ _id: userId as any });
 
     if (!user) {
-      console.log('❌ User not found for userId:', payload.userId, 'as ObjectId:', userId.toString());
+      console.log('User not found for userId:', payload.userId);
       return null;
     }
 
-    console.log('✅ User found:', user.email);
     return user;
   } catch (error: any) {
-    console.error('❌ Token verification error:', error.message);
+    console.error('Token verification error:', error.message);
     return null;
   }
 }
-
-export async function requireAuth(req: VercelRequest, res: VercelResponse): Promise<User> {
-  const user = await verifyToken(req, res);
-  if (!user) {
-    res.status(401).json({ success: false, error: 'Unauthorized' });
-    throw new Error('Unauthorized');
-  }
-  return user;
-}
-
