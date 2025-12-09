@@ -75,6 +75,8 @@ import reportsExpiryHandler from '../handlers/reports/expiry';
 import reportsWastageHandler from '../handlers/reports/wastage';
 import reportsPurchaseHandler from '../handlers/reports/purchase';
 import reportsSupplierPerformanceHandler from '../handlers/reports/supplier-performance';
+import reportsActivityHistoryHandler from '../handlers/reports/activity-history';
+import reportsStockHealthHandler from '../handlers/reports/stock-health';
 
 import auditIndexHandler from '../handlers/audit/index';
 import auditIdHandler from '../handlers/audit/[id]';
@@ -134,6 +136,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     '/api/reports/wastage': reportsWastageHandler,
     '/api/reports/purchase': reportsPurchaseHandler,
     '/api/reports/supplier-performance': reportsSupplierPerformanceHandler,
+    '/api/reports/activity-history': reportsActivityHistoryHandler,
+    '/api/reports/stock-health': reportsStockHealthHandler,
     
     // Consumption
     '/api/consumption': consumptionIndexHandler,

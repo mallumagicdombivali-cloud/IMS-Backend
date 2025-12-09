@@ -20,6 +20,8 @@
     "jsonwebtoken": "^9.0.2",
     "module-alias": "^2.2.3",
     "mongodb": "^6.3.0",
+    "next": "^16.0.8",
+    "recharts": "^3.5.1",
     "swagger-ui-express": "^5.0.1",
     "yamljs": "^0.3.0",
     "zod": "^3.22.4"
