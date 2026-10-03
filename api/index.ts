@@ -6,6 +6,8 @@ import YAML from 'yamljs';
 import cors from 'cors'; // Make sure to import cors
 import seedHandler from '../handlers/system/seed';
 
+const openApiSpec = YAML.load(path.join(process.cwd(), 'public', 'docs', 'openapi.yaml'));
+
 // --- 1. Define Helper to run Middleware in Vercel ---
 function runMiddleware(req: VercelRequest, res: VercelResponse, fn: Function) {
   return new Promise((resolve, reject) => {
@@ -96,6 +98,14 @@ import systemCheckExpiryHandler from '../handlers/system/check-expiry';
 import systemGenerateReportsHandler from '../handlers/system/generate-reports';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.url?.split('?')[0] === '/docs' || req.url?.split('?')[0] === '/docs/') {
+    return swaggerUi.setup(openApiSpec)(req as any, res as any, () => undefined);
+  }
+
+  if (req.url?.split('?')[0].startsWith('/docs/')) {
+    return swaggerUi.serve[0](req as any, res as any, () => undefined);
+  }
+
   // --- 3. APPLY CORS HERE ---
   // This executes the cors middleware against the Vercel request/response objects
   await runMiddleware(req, res, cors(corsOptions));

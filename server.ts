@@ -17,14 +17,21 @@ import express, { Request, Response, NextFunction } from 'express';
 import { initializeDatabase } from './lib/init-db';
 import { connectDB } from './lib/db';
 import { parseCookies } from './lib/cookies';
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yamljs';
 import * as fs from 'fs';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const openApiSpec = YAML.load(path.join(process.cwd(), 'public', 'docs', 'openapi.yaml'));
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Interactive API documentation
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(openApiSpec));
 
 // Parse cookies middleware
 app.use((req: Request, res: Response, next: NextFunction) => {
@@ -225,4 +232,3 @@ process.on('SIGTERM', async () => {
 
 // Start the server
 startServer();
-
